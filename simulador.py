@@ -28,21 +28,36 @@ def validar_dados(data: np.ndarray, Ns: int, tol: float = 1e-6) -> Tuple[bool, n
         ret = False
     return (ret, val_invalidos)
 
-def simular(data: np.ndarray, alpha: float, V0: Tuple[float,float] = (0.0,0.0), T: float = 1.0, pos0: Tuple[float,float] = (0.0,0.0)):
+def simular(data: np.ndarray, alpha: float,
+            V0: Tuple[float,float] = (0.0,0.0),
+            T: float = 1.0,
+            pos0: Tuple[float,float] = (0.0,0.0)):
     """
-    Gera dois arrays contendo os valores de posição e velocidade do drone a partir de um array de simbolos.
+    Calcula os valores de pos e velocidade de um drone a partir de Ns símbolos
+    Retorna (pos, V) com shape (Ns+1, 2).
     """
-    n = data.size
-    acel = alpha*np.column_stack((data.real, data.imag))
+    X = np.asarray(data, dtype=np.complex128)
+    Ns = X.size
 
-    V = np.zeros((n+1,2), dtype = float)
-    V[0, :] = np.array(V0, dtype=float)
-    V[1:, :] = V[0, :] + np.cumsum(acel, axis=0)
+    cx = np.zeros(Ns+1, dtype=float)
+    cy = np.zeros(Ns+1, dtype=float)
+    vx = np.zeros(Ns+1, dtype=float)
+    vy = np.zeros(Ns+1, dtype=float)
 
-    pos = np.zeros((n+1,2), dtype = float)
-    pos[0, :] = np.array(pos0, dtype = float)
-    pos[1:, :] = pos[0, :] + T*np.cumsum(V[:-1,:], axis=0)
+    cx[0], cy[0] = float(pos0[0]), float(pos0[1])
+    vx[0], vy[0] = float(V0[0]), float(V0[1])
 
+    for k in range(Ns):
+        # 1) Atualiza velocidade com o comando do símbolo atual
+        vx[k+1] = vx[k] + alpha * float(np.real(X[k]))
+        vy[k+1] = vy[k] + alpha * float(np.imag(X[k]))
+
+        # 2) Atualiza posição usando a velocidade já atualizada
+        cx[k+1] = cx[k] + T * vx[k+1]
+        cy[k+1] = cy[k] + T * vy[k+1]
+
+    pos = np.column_stack((cx, cy))
+    V = np.column_stack((vx, vy))
     return pos, V
 
 def plotar(pos: np.ndarray, V: np.ndarray, show_quiver: bool = True,

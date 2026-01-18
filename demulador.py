@@ -70,8 +70,8 @@ y = np.loadtxt('./data/rx_sgn_y.csv', dtype=np.complex128)
 # Como y se dá por: x + z com x real, é possivel dizer que y.imag é puramente ruído
 # Logo, y.real será x + z_r
 y = y.real
-
 yb = np.zeros((Ns, N))
+
 for m in range(Ns):
     yb[m] = y[(21*m):(21*m+21)]
 
@@ -83,12 +83,14 @@ h = obter_sinc(M, w_c)
 nfft = int(2**np.ceil(np.log2(N+len(h)-1)))
 H = obter_filtro_freq(h,nfft)
 
+
 ybR = np.sqrt(2)*np.cos(2*np.pi*fc*t)*yb
 ybI = -np.sqrt(2)*np.sin(2*np.pi*fc*t)*yb
 
 freqs = np.fft.fftfreq(nfft, d = 1/fs)
 
 S_raw = np.zeros(Ns, dtype=np.complex128)
+
 for m in range(Ns):
     S_raw[m] = extrair_sim(H, ybR[m], ybI[m], N, M)
     S[m] = sim_mais_proximo(S_raw[m])
@@ -102,6 +104,7 @@ plt.ylabel('Parte Imaginária (Q)')
 plt.axhline(0, color='k', linewidth=0.7)
 plt.axvline(0, color='k', linewidth=0.7)
 plt.grid()
+plt.savefig('./imgs/img2.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 

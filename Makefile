@@ -1,5 +1,5 @@
 all:
-	python3 analise.py
+	python3 demulador.py
 	python3 simulador.py
 
 dem:
