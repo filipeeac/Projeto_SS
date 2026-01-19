@@ -5,7 +5,7 @@ import sys
 
 # O arquivo que deve ser lido deve possuir um símbolo por linha.
 # Mais especificamente, os símbolos devem estar no conjunto S4qam
-# Os símbolos são complexos e a parte real do símbolo corresponde
+# Os símbolos são complexos. A parte real do símbolo corresponde
 # a aceleração no eixo x e a parte imaginária corresponde a aceleração
 # do eixo y
 
@@ -14,19 +14,19 @@ def validar_dados(data: np.ndarray, Ns: int, tol: float = 1e-6) -> Tuple[bool, n
     Função que verifica se os simbolos de um array pertencem ao conjunto S4qam
     com precisão arbitrária.
     Caso sim, gera um Tuple com Verdadeiro, caso contrário, gera Falso junto a 
-    um array contendo os valores inválidos.
+    um array contendo os indices dos valores inválidos.
     """
     h = np.sqrt(2)/2
     S4qam = np.array([h+1j*h, -h+1j*h, -h-1j*h, h-1j*h], dtype = np.complex128)
     diffs = np.abs(data.reshape(-1,1) - S4qam.reshape(1,-1))
     diff_min = diffs.min(axis=1)
-    val_invalidos = diff_min > tol
-    ret = not val_invalidos.any()
+    idx_invalidos = diff_min > tol
+    ret = not idx_invalidos.any()
     if len(data) != Ns:
         print("Número esperado de símbolos inválido...")
         print(f'Quantidade esperada: {Ns}... Quantidade recebida: {len(data)}')
         ret = False
-    return (ret, val_invalidos)
+    return (ret, idx_invalidos)
 
 def simular(data: np.ndarray, alpha: float,
             V0: Tuple[float,float] = (0.0,0.0),
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     try:
         data = np.loadtxt(path, skiprows = 0, dtype = np.complex128)
     except Exception as e:
-        print(f'Deu ruim nobre. Erro: {e}')
+        print(f'Ocorreu um erro. Erro: {e}')
         sys.exit(1)
 
 
